@@ -7,19 +7,19 @@ $("de").innerHTML=Object.keys(C).map(function(k){return"<option>"+k+"</option>"}
 async function api(path,opt){
   opt=opt||{};
   opt.headers={"Content-Type":"application/json","x-admin-key":KEY};
-  var r=await fetch((window.API_BASE||"")+"/api"+path,opt);
-  if(r.status==401){
-    KEY=prompt("أدخل كلمة سر الإدارة")||"";
-    sessionStorage.setItem("mwkey",KEY);
-    if(KEY)return api(path,opt);
-    throw new Error("auth");
-  }
+  var ac=new AbortController(),to=setTimeout(function(){ac.abort()},75000);
+  opt.signal=ac.signal;
+  var r;
+  try{r=await fetch((window.API_BASE||"")+"/api"+path,opt)}
+  catch(e){clearTimeout(to);throw new Error(e.name=="AbortError"?"السيرفر مردش خلال 75 ثانية (غالبًا كان نايم). جرّب تاني.":"تعذر الاتصال بالسيرفر (غالبًا مشكلة CORS أو الرابط في config.js غلط أو السيرفر واقف)")}
+  clearTimeout(to);
+  if(r.status==401)throw new Error("auth");
   var j=await r.json().catch(function(){return{}});
-  if(!r.ok)throw new Error(j.error||"خطأ");
+  if(!r.ok)throw new Error(j.error||("خطأ من السيرفر ("+r.status+")"));
   return j;
 }
 var timer=null;
-function tab(n){clearInterval(timer);if(n==2)timer=setInterval(load,30000);$("p1").hidden=n!=1;$("p2").hidden=n!=2;$("t1").className=n==1?"on":"";$("t2").className=n==2?"on":"";if(n==2)load()}
+function tab(n){clearInterval(timer);if(n==2)timer=setInterval(load,30000);$("p1").hidden=n!=1;$("p2").hidden=n!=2;$("t1").className=n==1?"on":"";$("t2").className=n==2?"on":"";if(n==2){initMap();if(map)setTimeout(function(){map.invalidateSize()},50);load()}}
 function km(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r*Math.cos((a+c)*r/2);return Math.round(Math.sqrt(x*x+y*y)*6371)}
 
 async function add(){
@@ -29,10 +29,17 @@ async function add(){
     var r=await api("/drivers",{method:"POST",body:JSON.stringify({name:n,phone:p,license_no:$("lic").value,plate:$("pl").value,vehicle_type:$("ty").value,destination:$("de").value})});
     ["n","ph","lic","pl"].forEach(function(i){$(i).value=""});
     $("msg").innerHTML='تم تسجيل السائق ✓ <button class="btn s" onclick="cp(\''+BASE+'driver.html?id='+r.id+'\')">نسخ رابط السائق</button>';
-  }catch(e){alert(e.message)}
+  }catch(e){if(e.message=="auth"){alert("لازم تدخل كلمة سر الإدارة الأول من تبويب الأسطول والخريطة");tab(2)}else alert(e.message)}
 }
+var loaded=false;
+function setKey(){KEY=$("kin").value.trim();sessionStorage.setItem("mwkey",KEY);load()}
 async function load(){
-  try{D=await api("/fleet");draw()}catch(e){if(e.message!="auth")alert(e.message)}
+  if(!loaded)$("list").innerHTML='<p class="mut">جاري الاتصال بالسيرفر... لو كان نايم ممكن ياخد لحد دقيقة.</p>';
+  try{D=await api("/fleet");loaded=true;draw()}
+  catch(e){
+    if(e.message=="auth")$("list").innerHTML='<p><b>أدخل كلمة سر الإدارة</b></p><p><input id="kin" type="password" style="max-width:260px"> <button class="btn" onclick="setKey()">دخول</button></p>';
+    else $("list").innerHTML='<p class="err" style="color:#c0392b;font-weight:700">'+esc(e.message)+'</p><p><button class="btn" onclick="load()">إعادة المحاولة</button></p>';
+  }
 }
 function find(id){return D.filter(function(x){return x.id==id})[0]}
 async function del(id){
@@ -42,7 +49,8 @@ async function del(id){
 var map=null,layer=null,fitted=false;
 function ago(t){if(!t)return"";var m=Math.round((Date.now()-new Date(t))/60000);return m<1?"الآن":m<60?"منذ "+m+" دقيقة":"منذ "+Math.round(m/60)+" ساعة"}
 function initMap(){
-  if(map||!window.L)return;
+  if(map)return;
+  if(!window.L){$("map").innerHTML='<p class="mut" style="padding:16px;direction:rtl">مكتبة الخريطة (Leaflet) مش اتحمّلت. تأكد من الإنترنت أو إن cdnjs مش محجوب.</p>';return}
   map=L.map("map",{scrollWheelZoom:false}).setView([27.5,31],6);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap"}).addTo(map);
   layer=L.layerGroup().addTo(map);

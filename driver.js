@@ -3,12 +3,13 @@ var id=new URLSearchParams(location.search).get("id"),watch=null,last=0,lock=nul
 function $(i){return document.getElementById(i)}
 function km(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r*Math.cos((a+c)*r/2);return Math.round(Math.sqrt(x*x+y*y)*6371)}
 
+$("hi").textContent="جاري التحميل... (لو السيرفر كان نايم ممكن ياخد لحد دقيقة)";
 fetch((window.API_BASE||"")+"/api/drivers/"+id+"/info").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   $("hi").textContent="أهلًا "+d.name;
   dest=d.destination;
   $("dest").textContent="الوجهة: "+(d.destination||"-")+(d.status=="arrived"?" (تم الوصول)":"");
 }).catch(function(){
-  $("hi").textContent="رابط غير صحيح";$("go").disabled=true;
+  $("hi").textContent="تعذر تحميل البيانات";$("err").textContent="الرابط غلط أو السيرفر مش بيرد. اقفل الصفحة وافتح الرابط تاني بعد دقيقة.";$("go").disabled=true;
 });
 
 function send(p){
