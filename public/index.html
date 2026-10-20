@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المتوكل للنقل | تسجيل ومتابعة السائقين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="wrap">
+<div class="brand">
+<svg width="84" height="54" viewBox="0 0 84 54" aria-hidden="true"><path d="M4 40c10-22 36-30 62-24" stroke="#e0b04f" stroke-width="3" fill="none"/><path d="M60 10l10 5-11 4z" fill="#e0b04f"/><rect x="10" y="18" width="36" height="22" rx="3" fill="#fff"/><path d="M48 24h14l8 8v8H48z" fill="#fff"/><circle cx="22" cy="42" r="6" fill="#e0b04f"/><circle cx="60" cy="42" r="6" fill="#e0b04f"/></svg>
+<div><h1>شركة المتوكل للنقل</h1><small>AL MUTAWAKEL TRANSPORT</small></div></div>
+<div class="road"></div>
+</div></header>
+<main class="wrap">
+<div class="tabs"><button id="t1" class="on" onclick="tab(1)">تسجيل سائق</button><button id="t2" onclick="tab(2)">الأسطول والخريطة</button></div>
+
+<section id="p1" class="card">
+<h2 style="margin-top:0">بيانات السائق</h2>
+<div class="grid">
+<div><label>الاسم بالكامل</label><input id="n" placeholder="مثال: أحمد محمود"></div>
+<div><label>رقم الموبايل</label><input id="ph" inputmode="tel" placeholder="01xxxxxxxxx"></div>
+<div><label>رقم رخصة القيادة</label><input id="lic"></div>
+<div><label>رقم لوحة السيارة</label><input id="pl"></div>
+<div><label>نوع السيارة</label><select id="ty"><option>سيارة نقل سيارات (سطحة)</option><option>تريلا</option><option>نقل ربع</option></select></div>
+<div><label>الوجهة</label><select id="de"></select></div>
+</div>
+<p style="margin-bottom:0"><button class="btn g" onclick="add()">تسجيل السائق</button> <span id="msg" class="ok"></span></p>
+</section>
+
+<section id="p2" hidden>
+<div class="stats"><div><b id="s1">0</b>سائقين</div><div><b id="s2">0</b>في الطريق</div><div><b id="s3">0</b>وصلوا</div></div>
+<div class="card"><svg class="map" id="map" viewBox="0 0 300 230" role="img" aria-label="خريطة تتبع السائقين"></svg>
+<p class="mut" style="margin-bottom:0">الخريطة توضيحية. النقاط الذهبية هي مواقع السائقين والخط المنقط يصل لوجهتهم.</p></div>
+<div class="card" id="list"></div>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
