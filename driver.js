@@ -3,7 +3,7 @@ var id=new URLSearchParams(location.search).get("id"),watch=null,last=0,lock=nul
 function $(i){return document.getElementById(i)}
 function km(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r*Math.cos((a+c)*r/2);return Math.round(Math.sqrt(x*x+y*y)*6371)}
 
-fetch("/api/drivers/"+id+"/info").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+fetch((window.API_BASE||"")+"/api/drivers/"+id+"/info").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   $("hi").textContent="أهلًا "+d.name;
   dest=d.destination;
   $("dest").textContent="الوجهة: "+(d.destination||"-")+(d.status=="arrived"?" (تم الوصول)":"");
@@ -15,7 +15,7 @@ function send(p){
   var t=Date.now();
   if(t-last<55000)return;
   last=t;
-  fetch("/api/drivers/"+id+"/location",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})})
+  fetch((window.API_BASE||"")+"/api/drivers/"+id+"/location",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})})
   .then(function(r){if(!r.ok)throw 0;
     var m="آخر إرسال: "+new Date().toLocaleTimeString("ar-EG");
     if(dest&&C[dest])m+=" · المتبقي حوالي "+km(p.coords.latitude,p.coords.longitude,C[dest][0],C[dest][1])+" كم";

@@ -7,7 +7,7 @@ $("de").innerHTML=Object.keys(C).map(function(k){return"<option>"+k+"</option>"}
 async function api(path,opt){
   opt=opt||{};
   opt.headers={"Content-Type":"application/json","x-admin-key":KEY};
-  var r=await fetch("/api"+path,opt);
+  var r=await fetch((window.API_BASE||"")+"/api"+path,opt);
   if(r.status==401){
     KEY=prompt("أدخل كلمة سر الإدارة")||"";
     sessionStorage.setItem("mwkey",KEY);
@@ -18,7 +18,8 @@ async function api(path,opt){
   if(!r.ok)throw new Error(j.error||"خطأ");
   return j;
 }
-function tab(n){$("p1").hidden=n!=1;$("p2").hidden=n!=2;$("t1").className=n==1?"on":"";$("t2").className=n==2?"on":"";if(n==2)load()}
+var timer=null;
+function tab(n){clearInterval(timer);if(n==2)timer=setInterval(load,30000);$("p1").hidden=n!=1;$("p2").hidden=n!=2;$("t1").className=n==1?"on":"";$("t2").className=n==2?"on":"";if(n==2)load()}
 function km(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r*Math.cos((a+c)*r/2);return Math.round(Math.sqrt(x*x+y*y)*6371)}
 
 async function add(){
