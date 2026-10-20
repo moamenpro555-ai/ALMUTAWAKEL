@@ -1,5 +1,5 @@
 var C={"القاهرة":[30.04,31.24],"الإسكندرية":[31.20,29.92],"طنطا":[30.79,31.00],"بورسعيد":[31.26,32.30],"السويس":[29.97,32.55],"أسيوط":[27.18,31.18],"الأقصر":[25.69,32.64],"أسوان":[24.09,32.90]};
-var D=[],KEY=sessionStorage.getItem("mwkey")||"";
+var BASE=location.origin+location.pathname.replace(/[^\/]*$/,""),D=[],KEY=sessionStorage.getItem("mwkey")||"";
 function $(i){return document.getElementById(i)}
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML}
 $("de").innerHTML=Object.keys(C).map(function(k){return"<option>"+k+"</option>"}).join("");
@@ -28,7 +28,7 @@ async function add(){
   try{
     var r=await api("/drivers",{method:"POST",body:JSON.stringify({name:n,phone:p,license_no:$("lic").value,plate:$("pl").value,vehicle_type:$("ty").value,destination:$("de").value})});
     ["n","ph","lic","pl"].forEach(function(i){$(i).value=""});
-    $("msg").innerHTML='تم تسجيل السائق ✓ <button class="btn s" onclick="cp(\''+location.origin+'/driver.html?id='+r.id+'\')">نسخ رابط السائق</button>';
+    $("msg").innerHTML='تم تسجيل السائق ✓ <button class="btn s" onclick="cp(\''+BASE+'driver.html?id='+r.id+'\')">نسخ رابط السائق</button>';
   }catch(e){alert(e.message)}
 }
 async function load(){
@@ -61,7 +61,7 @@ function draw(){
     if(d.status=="arrived"||(has&&r<15)){arr++;pr=100}else run++;
     if(has){var a=pt(d.lat,d.lng),b=pt(t[0],t[1]);
       s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="var(--gold)" stroke-dasharray="4 3"/><circle cx="'+a[0]+'" cy="'+a[1]+'" r="5.5" fill="var(--gold)" stroke="var(--navy)" stroke-width="2"/>'}
-    h+='<div class="row"><div><b>'+esc(d.name)+'</b> <span class="tag">'+esc(d.vehicle_type)+'</span><div class="mut">'+esc(d.phone)+' · لوحة: '+esc(d.plate||"-")+'</div><div class="mut">الوجهة: '+esc(d.destination)+' · المتبقي '+r+' كم · '+(has?d.lat.toFixed(3)+', '+d.lng.toFixed(3):"لم يتم تحديد الموقع بعد")+'</div><div class="bar"><i style="width:'+pr+'%"></i></div></div><div><button class="btn s" onclick="loc(\''+d.id+'\')">موقعي الآن</button> <button class="btn s" onclick="cp(\''+location.origin+'/driver.html?id='+d.id+'\')">رابط السائق</button> <button class="btn s g" onclick="sim(\''+d.id+'\')">محاكاة تقدم</button> <button class="btn s" style="background:#a33" onclick="del(\''+d.id+'\')">حذف</button></div></div>';
+    h+='<div class="row"><div><b>'+esc(d.name)+'</b> <span class="tag">'+esc(d.vehicle_type)+'</span><div class="mut">'+esc(d.phone)+' · لوحة: '+esc(d.plate||"-")+'</div><div class="mut">الوجهة: '+esc(d.destination)+' · المتبقي '+r+' كم · '+(has?d.lat.toFixed(3)+', '+d.lng.toFixed(3):"لم يتم تحديد الموقع بعد")+'</div><div class="bar"><i style="width:'+pr+'%"></i></div></div><div><button class="btn s" onclick="loc(\''+d.id+'\')">موقعي الآن</button> <button class="btn s" onclick="cp(\''+BASE+'driver.html?id='+d.id+'\')">رابط السائق</button> <button class="btn s g" onclick="sim(\''+d.id+'\')">محاكاة تقدم</button> <button class="btn s" style="background:#a33" onclick="del(\''+d.id+'\')">حذف</button></div></div>';
   });
   $("map").innerHTML=s;
   $("list").innerHTML=h||'<p class="mut">لا يوجد سائقين مسجلين بعد.</p>';
