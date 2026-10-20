@@ -38,3 +38,10 @@ input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--l
 .leaflet-popup-content{direction:rtl;font-family:Cairo,sans-serif}
 .mut{color:var(--mut);font-size:.85rem}
 .ok{color:#2a9d5c;font-weight:700}
+.srch{display:flex;gap:8px}.srch input{flex:1}
+#res .opt{display:block;width:100%;text-align:right;margin-top:6px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+#res .opt:hover{border-color:var(--gold)}
+#pmap{direction:ltr;height:300px;border-radius:12px;border:1px solid var(--line);z-index:0;margin-top:8px}
+.pin{font-size:28px;line-height:28px;background:none;border:0}
+.trk.old{background:#999;filter:grayscale(.6)}
+button:disabled{opacity:.5;cursor:not-allowed}

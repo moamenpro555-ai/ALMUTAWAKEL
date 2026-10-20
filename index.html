@@ -26,9 +26,15 @@
 <div><label>رقم رخصة القيادة</label><input id="lic"></div>
 <div><label>رقم لوحة السيارة</label><input id="pl"></div>
 <div><label>نوع السيارة</label><select id="ty"><option>سيارة نقل سيارات (سطحة)</option><option>تريلا</option><option>نقل ربع</option></select></div>
-<div><label>الوجهة</label><select id="de"></select></div>
+<div style="grid-column:1/-1"><label>الوجهة بالتفصيل (ابحث بالعنوان أو اضغط على الخريطة)</label>
+<div class="srch"><input id="q" placeholder="مثال: ميدان لبنان، المهندسين، الجيزة"><button type="button" class="btn" onclick="search()">بحث</button></div>
+<div id="res"></div>
+<div style="margin:8px 0"><select id="de" onchange="cityPick()"></select></div>
+<div id="pmap"></div>
+<p id="sel" class="mut"></p>
+<label>تفاصيل إضافية (اختياري)</label><input id="ex" placeholder="مثال: بوابة 3 / اسم المسؤول / تليفون الاستلام"></div>
 </div>
-<p style="margin-bottom:0"><button class="btn g" onclick="add()">تسجيل السائق</button> <span id="msg" class="ok"></span></p>
+<p style="margin-bottom:0"><button class="btn g" id="addb" onclick="add()">تسجيل السائق</button> <span id="msg" class="ok"></span></p>
 </section>
 
 <section id="p2" hidden>
@@ -40,6 +46,7 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="config.js"></script>
+<script src="common.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -12,6 +12,7 @@
 @keyframes pl{50%{opacity:.25}}
 .off{background:#999;animation:none}
 .err{color:#c0392b;font-weight:700}
+a[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -25,6 +26,7 @@
 <p class="mut" id="dest"></p>
 <p><span class="pulse off" id="dot"></span><b id="st">المشاركة متوقفة</b></p>
 <button class="btn g big" id="go" onclick="toggle()">ابدأ مشاركة موقعي</button>
+<p><a id="nav" class="btn big" hidden target="_blank" rel="noopener" style="display:block;text-decoration:none;background:var(--navy);color:#fff">افتح الطريق في خرائط جوجل</a></p>
 <p id="info" class="mut"></p>
 <p id="err" class="err"></p>
 </div>
@@ -33,6 +35,7 @@
 </div>
 </main>
 <script src="config.js"></script>
+<script src="common.js"></script>
 <script src="driver.js"></script>
 </body>
 </html>
