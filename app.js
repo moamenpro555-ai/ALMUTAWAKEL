@@ -35,35 +35,41 @@ async function load(){
   try{D=await api("/fleet");draw()}catch(e){if(e.message!="auth")alert(e.message)}
 }
 function find(id){return D.filter(function(x){return x.id==id})[0]}
-function loc(id){
-  if(!navigator.geolocation){alert("المتصفح لا يدعم تحديد الموقع");return}
-  navigator.geolocation.getCurrentPosition(async function(p){
-    await api("/drivers/"+id+"/location",{method:"POST",body:JSON.stringify({lat:p.coords.latitude,lng:p.coords.longitude})});
-    load();
-  },function(){alert("لم يتم السماح بتحديد الموقع")});
-}
-async function sim(id){
-  var d=find(id),t=C[d.destination],la=d.lat==null?30.04:d.lat,lo=d.lng==null?31.24:d.lng;
-  await api("/drivers/"+id+"/location",{method:"POST",body:JSON.stringify({lat:la+(t[0]-la)*.25,lng:lo+(t[1]-lo)*.25})});
-  load();
-}
 async function del(id){
   if(!confirm("حذف السائق؟"))return;
   await api("/drivers/"+id,{method:"DELETE"});load();
 }
-function pt(la,lo){return[(lo-24)/13*300,(32-la)/10*230]}
+var map=null,layer=null,fitted=false;
+function ago(t){if(!t)return"";var m=Math.round((Date.now()-new Date(t))/60000);return m<1?"الآن":m<60?"منذ "+m+" دقيقة":"منذ "+Math.round(m/60)+" ساعة"}
+function initMap(){
+  if(map||!window.L)return;
+  map=L.map("map",{scrollWheelZoom:false}).setView([27.5,31],6);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap"}).addTo(map);
+  layer=L.layerGroup().addTo(map);
+}
+function focusD(id){
+  var d=find(id);if(!d||d.lat==null||!map)return;
+  map.setView([d.lat,d.lng],11);$("map").scrollIntoView({behavior:"smooth",block:"center"});
+}
 function draw(){
-  var s="",run=0,arr=0,h="";
-  Object.keys(C).forEach(function(k){var p=pt(C[k][0],C[k][1]);s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="var(--navy)"/><text x="'+(p[0]+5)+'" y="'+(p[1]+3)+'" font-size="8" fill="var(--mut)">'+k+'</text>'});
+  var run=0,arr=0,h="",pts=[];
+  initMap();
+  if(map){map.invalidateSize();layer.clearLayers()}
   D.forEach(function(d){
     var t=C[d.destination]||[30.04,31.24],has=d.lat!=null,st=d.start_km||1;
-    var r=has?km(d.lat,d.lng,t[0],t[1]):st,pr=Math.max(0,Math.min(100,Math.round((1-r/st)*100)));
-    if(d.status=="arrived"||(has&&r<15)){arr++;pr=100}else run++;
-    if(has){var a=pt(d.lat,d.lng),b=pt(t[0],t[1]);
-      s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="var(--gold)" stroke-dasharray="4 3"/><circle cx="'+a[0]+'" cy="'+a[1]+'" r="5.5" fill="var(--gold)" stroke="var(--navy)" stroke-width="2"/>'}
-    h+='<div class="row"><div><b>'+esc(d.name)+'</b> <span class="tag">'+esc(d.vehicle_type)+'</span><div class="mut">'+esc(d.phone)+' · لوحة: '+esc(d.plate||"-")+'</div><div class="mut">الوجهة: '+esc(d.destination)+' · المتبقي '+r+' كم · '+(has?d.lat.toFixed(3)+', '+d.lng.toFixed(3):"لم يتم تحديد الموقع بعد")+'</div><div class="bar"><i style="width:'+pr+'%"></i></div></div><div><button class="btn s" onclick="loc(\''+d.id+'\')">موقعي الآن</button> <button class="btn s" onclick="cp(\''+BASE+'driver.html?id='+d.id+'\')">رابط السائق</button> <button class="btn s g" onclick="sim(\''+d.id+'\')">محاكاة تقدم</button> <button class="btn s" style="background:#a33" onclick="del(\''+d.id+'\')">حذف</button></div></div>';
+    var r=has?km(d.lat,d.lng,t[0],t[1]):st,pr=has?Math.max(0,Math.min(100,Math.round((1-r/st)*100))):0;
+    var done=d.status=="arrived"||(has&&r<15);
+    if(done){arr++;pr=100}else run++;
+    if(has&&layer){
+      pts.push([d.lat,d.lng]);
+      L.circleMarker(t,{radius:5,color:"#1b3a6b",fillColor:"#fff",fillOpacity:1,weight:2}).bindTooltip(d.destination).addTo(layer);
+      L.polyline([[d.lat,d.lng],t],{color:"#c9993a",weight:3,dashArray:"6 8"}).addTo(layer);
+      L.marker([d.lat,d.lng],{icon:L.divIcon({className:"trk"+(done?" done":""),html:"🚚",iconSize:[36,36],iconAnchor:[18,18]})})
+        .bindPopup("<b>"+esc(d.name)+"</b><br>"+esc(d.plate||"")+"<br>الوجهة: "+esc(d.destination)+"<br>"+(done?"وصل":"المتبقي "+r+" كم")+"<br>آخر موقع: "+ago(d.recorded_at)).addTo(layer);
+    }
+    h+='<div class="row"><div><b>'+esc(d.name)+'</b> <span class="tag">'+esc(d.vehicle_type)+'</span>'+(done?' <span class="tag" style="background:#2a9d5c">وصل</span>':'')+'<div class="mut">'+esc(d.phone)+' · لوحة: '+esc(d.plate||"-")+'</div><div class="mut">الوجهة: '+esc(d.destination)+' · '+(has?(done?'تم الوصول':'المتبقي '+r+' كم')+' · آخر موقع '+ago(d.recorded_at):'لم يبدأ مشاركة الموقع بعد (المسافة الكلية '+st+' كم)')+'</div><div class="bar"><i style="width:'+pr+'%"></i></div></div><div>'+(has?'<button class="btn s g" onclick="focusD(\''+d.id+'\')">على الخريطة</button> ':'')+'<button class="btn s" onclick="cp(BASE+\'driver.html?id='+d.id+'\')">رابط السائق</button> <button class="btn s" style="background:#a33" onclick="del(\''+d.id+'\')">حذف</button></div></div>';
   });
-  $("map").innerHTML=s;
+  if(map&&!fitted&&pts.length){map.fitBounds(pts,{padding:[50,50],maxZoom:10});fitted=true}
   $("list").innerHTML=h||'<p class="mut">لا يوجد سائقين مسجلين بعد.</p>';
   $("s1").textContent=D.length;$("s2").textContent=run;$("s3").textContent=arr;
 }

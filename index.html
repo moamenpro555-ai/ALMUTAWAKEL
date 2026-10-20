@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>المتوكل للنقل | تسجيل ومتابعة السائقين</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,11 +33,12 @@
 
 <section id="p2" hidden>
 <div class="stats"><div><b id="s1">0</b>سائقين</div><div><b id="s2">0</b>في الطريق</div><div><b id="s3">0</b>وصلوا</div></div>
-<div class="card"><svg class="map" id="map" viewBox="0 0 300 230" role="img" aria-label="خريطة تتبع السائقين"></svg>
-<p class="mut" style="margin-bottom:0">الخريطة توضيحية. النقاط الذهبية هي مواقع السائقين والخط المنقط يصل لوجهتهم.</p></div>
+<div class="card"><div id="map" role="region" aria-label="خريطة تتبع السائقين"></div>
+<p class="mut" style="margin-bottom:0">الخريطة حقيقية، والمواقع بتتحدث تلقائيًا كل 30 ثانية من موبايل السائق. الشاحنة هي موقع السائق والخط المنقط يصل لوجهته.</p></div>
 <div class="card" id="list"></div>
 </section>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
